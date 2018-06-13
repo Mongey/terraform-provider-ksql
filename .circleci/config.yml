@@ -1,0 +1,44 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/Mongey/terraform-provider-ksql
+    docker:
+      - image: circleci/golang:1.11
+        environment:
+          TEST_RESULTS: /tmp/test-results
+      - image: confluentinc/cp-zookeeper:latest
+        environment:
+          ZOOKEEPER_CLIENT_PORT: 2181
+          ZOOKEEPER_TICK_TIME: 2000
+      - image: confluentinc/cp-kafka:5.1.0
+        environment:
+          KAFKA_BROKER_ID: 1
+          KAFKA_ZOOKEEPER_CONNECT: localhost:2181
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      - image: confluentinc/cp-ksql-server:5.1.0
+        environment:
+          KSQL_BOOTSTRAP_SERVERS: localhost:9092
+          KSQL_LISTENERS: http://0.0.0.0:8088/
+    steps:
+      - checkout
+      - run: go build
+      - store_artifacts:
+          path: /go/src/github.com/Mongey/terraform-provider-ksql/terraform-provider-ksql
+          destination: terraform-provider-ksql
+      - run: go get github.com/jstemmer/go-junit-report
+      - run: mkdir -p $TEST_RESULTS
+      - run:
+          name: Wait for ksql
+          command: |
+            until $(curl --output /dev/null --silent --head --fail http://localhost:8088); do
+              printf '.'
+              sleep 5
+            done
+      - run:
+          name: Run Tests
+          command: |
+            trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
+            make testacc| tee ${TEST_RESULTS}/go-test.out
+      - store_test_results:
+          path: /tmp/test-results

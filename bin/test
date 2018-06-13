@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -ex
+
+go build
+mv terraform-provider-ksql ~/.terraform.d/plugins/terraform-provider-ksql
+cd examples
+terraform init
+terraform plan
