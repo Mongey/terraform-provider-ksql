@@ -1,0 +1,17 @@
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+
+[[constraint]]
+  name = "github.com/Shopify/sarama"
+  source = "github.com/Mongey/sarama"
+  #version = "v1.19.0"
+  branch = "cm-new-describe-configs"
+
+[[constraint]]
+  name = "github.com/hashicorp/terraform"
+  version = "v0.11.8"
+
+[prune]
+  go-tests = true
+  non-go = true
+  unused-packages = true

@@ -3,14 +3,22 @@ package ksql
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 )
+
+// Logger provides a pluggable interface for caller-provided loggers
+type Logger interface {
+	Printf(string, ...interface{})
+}
 
 type KSQLServerInfo struct {
 	Version        string `json:"version"`
@@ -26,16 +34,46 @@ const AcceptHeader = "application/vnd.ksql.v1+json"
 
 // Client provides a client to interact with the KSQL REST API
 type Client struct {
+	context.Context
 	client *http.Client
 	host   string
+	Logger
 }
 
 // NewClient returns a new client
 func NewClient(host string) *Client {
-	return &Client{
-		host:   host,
-		client: &http.Client{},
+	return NewClientContext(context.Background(), host)
+}
+
+// NewClientContext returns a new client which supports cancelation
+// via the context
+func NewClientContext(ctx context.Context, host string) *Client {
+	c := &Client{
+		Context: ctx,
+		host:    host,
+		client:  &http.Client{},
+		Logger:  stdLogger{},
 	}
+	c.client.Transport = &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		DisableCompression:    true,
+	}
+	return c
+}
+
+type stdLogger struct{}
+
+// Printf implements the Logger interface
+func (stdLogger) Printf(fmt string, args ...interface{}) {
+	log.Printf(fmt, args...)
 }
 
 // CreateTable creates a KSQL Table
@@ -164,6 +202,10 @@ func (c *Client) Do(r Request) (Response, error) {
 		return nil, err
 	}
 
+	//if resp[0].ErrorCode != 0 {
+	//return nil, errors.New(resp[0].Message + "\n" + strings.Join(resp[0].StackTrace, "\n"))
+	//}
+
 	return nil, errorResp
 }
 
@@ -173,6 +215,7 @@ func (c *Client) Status(commandID string) (*StatusResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	req = req.WithContext(c)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -192,7 +235,12 @@ func (c *Client) Status(commandID string) (*StatusResponse, error) {
 
 // Query runs a Request, parsing the response and sending each on the channel
 func (c *Client) Query(r Request, ch chan *QueryResponse) error {
-	resp, err := c.doQuery(r)
+	return c.QueryContext(c, r, ch)
+}
+
+// QueryContext is a cancelable version of Query
+func (c *Client) QueryContext(ctx context.Context, r Request, ch chan *QueryResponse) error {
+	resp, err := c.doQueryContext(ctx, r)
 	if err != nil {
 		return err
 	}
@@ -201,16 +249,23 @@ func (c *Client) Query(r Request, ch chan *QueryResponse) error {
 	reader := bufio.NewReader(resp.Body)
 	for {
 		q, err := readQR(reader)
-		if err == io.EOF {
+		if err == io.EOF || err == io.ErrUnexpectedEOF {
 			break
 		}
 		if err != nil {
-			log.Println(err)
+			c.Logger.Printf("error reading results from ksql query %#v: %s", r.KSQL, err)
+			if err, ok := err.(net.Error); ok && !err.Temporary() {
+				return err
+			}
 		}
 		if q == nil {
 			continue
 		}
-		ch <- q
+		select {
+		case ch <- q:
+		case <-ctx.Done():
+			return nil
+		}
 	}
 	return err
 }
@@ -244,6 +299,10 @@ func (c *Client) LimitQuery(r Request) ([]*QueryResponse, error) {
 }
 
 func (c *Client) doQuery(r Request) (*http.Response, error) {
+	return c.doQueryContext(c, r)
+}
+
+func (c *Client) doQueryContext(ctx context.Context, r Request) (*http.Response, error) {
 	b, err := json.Marshal(r)
 	if err != nil {
 		return nil, err
@@ -252,6 +311,7 @@ func (c *Client) doQuery(r Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	req = req.WithContext(ctx)
 
 	req.Header.Set("Accept", AcceptHeader)
 	req.Header.Set("Content-Type", "application/json")
@@ -282,6 +342,7 @@ func (c *Client) ksqlRequest(r Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	req = req.WithContext(c)
 
 	req.Header.Set("Accept", AcceptHeader)
 	req.Header.Set("Content-Type", "application/json")
