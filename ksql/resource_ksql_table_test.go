@@ -13,6 +13,7 @@ func TestBasicTable(t *testing.T) {
 	err := createTopic("users")
 	if err != nil {
 		log.Printf("[DEBUG] state %v", err)
+		t.Fatalf("Could not create the topic: %s", err)
 	}
 	r.Test(t, r.TestCase{
 		Providers: testAccProviders,
