@@ -66,6 +66,7 @@ resource "ksql_stream" "example" {
 func createTopic(name string) error {
 	kafkaConfig := &kafka.Config{
 		BootstrapServers: &[]string{"localhost:9092"},
+		Timeout:          900,
 	}
 	kAdmin, err := kafka.NewClient(kafkaConfig)
 	if err == nil {
