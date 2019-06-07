@@ -49,7 +49,7 @@ func streamCreate(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(name)
 
-	return nil
+	return streamRead(d, meta)
 }
 
 func streamRead(d *schema.ResourceData, meta interface{}) error {

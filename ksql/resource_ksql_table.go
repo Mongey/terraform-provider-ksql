@@ -47,7 +47,7 @@ func tableCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	d.SetId(name)
-	return nil
+	return tableRead(d, meta)
 }
 
 func tableRead(d *schema.ResourceData, meta interface{}) error {
