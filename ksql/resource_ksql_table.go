@@ -15,10 +15,11 @@ func ksqlTableResource() *schema.Resource {
 		Delete: tableDelete,
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The name of the table",
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "The name of the table",
+				DiffSuppressFunc: DiffSuppressCaseSensitivity,
 			},
 			"query": {
 				Type:        schema.TypeString,
@@ -59,8 +60,10 @@ func tableRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	for _, t := range tables {
-		//d.Set("query")
 		log.Printf("[INFO] Found %s: %v", t.Name, t)
+		if t.Name == name {
+			d.Set("name", t.Name)
+		}
 	}
 	return nil
 }

@@ -15,10 +15,11 @@ func ksqlStreamResource() *schema.Resource {
 		Delete: streamDelete,
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The name of the stream<Plug>_",
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "The name of the stream<Plug>_",
+				DiffSuppressFunc: DiffSuppressCaseSensitivity,
 			},
 			"query": {
 				Type:        schema.TypeString,
@@ -61,8 +62,10 @@ func streamRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	for _, s := range streams {
-		//d.Set("query")
 		log.Printf("[INFO] Found %s: %v", s.Name, s)
+		if s.Name == name {
+			d.Set("name", s.Name)
+		}
 	}
 	return nil
 }
