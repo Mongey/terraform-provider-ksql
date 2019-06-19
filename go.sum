@@ -15,8 +15,10 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022/go.mod h1:nuWgzSkT5PnyOd+272uUmV0dnAnAn42Mk7PiQC5VzN4=
 github.com/DataDog/zstd v1.3.6-0.20190409195224-796139022798 h1:2T/jmrHeTezcCM58lvEQXs0UpQJCo5SoGAcg+mbSTIg=
 github.com/DataDog/zstd v1.3.6-0.20190409195224-796139022798/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
-github.com/Mongey/ksql v0.0.0-20190529181749-2c1a4ea00a44 h1:7KOJabM7GwmoCDWF19pciglEJYd2lgF3uVtBsqvJn0I=
-github.com/Mongey/ksql v0.0.0-20190529181749-2c1a4ea00a44/go.mod h1:UehIlXuy2xzgusCGTf/zV7fUOXRkNqWCL0MeLs6ISx8=
+github.com/Mongey/ksql v0.0.0-20190619184223-1373a14e7e3b h1:2pHS8d85Y82ngl7DRujfjXye50E1l+i+cO4kg1hnDKA=
+github.com/Mongey/ksql v0.0.0-20190619184223-1373a14e7e3b/go.mod h1:UehIlXuy2xzgusCGTf/zV7fUOXRkNqWCL0MeLs6ISx8=
+github.com/Mongey/ksql v0.0.0-20190627160212-df1d87a81b4e h1:AC/0quIMRL5MnMjCywuulZ+CYga/4+ytm+uKs2qb7RI=
+github.com/Mongey/ksql v0.0.0-20190627160212-df1d87a81b4e/go.mod h1:UehIlXuy2xzgusCGTf/zV7fUOXRkNqWCL0MeLs6ISx8=
 github.com/Mongey/terraform-provider-kafka v0.1.1/go.mod h1:/y0l9ng9Vex0ZlOiMYwbMCsvZknr9Zt7Mf4iLhwVoQY=
 github.com/Mongey/terraform-provider-kafka v0.2.0 h1:yx+RKQdxvuIj3brODLA4GScjuWyifVcAyGSCWXw4pKo=
 github.com/Mongey/terraform-provider-kafka v0.2.0/go.mod h1:s8ujQSQuW60fUHsd7XfWSVi4H3n1l98oPxIkougT5LY=
