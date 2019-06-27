@@ -55,15 +55,14 @@ func tableRead(d *schema.ResourceData, meta interface{}) error {
 	c := meta.(*ksql.Client)
 	name := d.Get("name").(string)
 	log.Printf("[ERROR] Searching for table %s", name)
-	tables, err := c.ListTables()
+	info, err := c.Describe(name)
 	if err != nil {
 		return err
 	}
-	for _, t := range tables {
-		log.Printf("[INFO] Found %s: %v", t.Name, t)
-		if t.Name == name {
-			d.Set("name", t.Name)
-		}
+	log.Printf("[INFO] Found %s: %v", info.Name, info)
+	d.Set("name", info.Name)
+	if len(info.WriteQueries) > 0 {
+		d.Set("query", info.WriteQueries[0].QueryString)
 	}
 	return nil
 }

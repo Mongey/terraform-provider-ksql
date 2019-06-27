@@ -57,15 +57,14 @@ func streamRead(d *schema.ResourceData, meta interface{}) error {
 	c := meta.(*ksql.Client)
 	name := d.Get("name").(string)
 	log.Printf("[ERROR] Searching for stream %s", name)
-	streams, err := c.ListStreams()
+	info, err := c.Describe(name)
 	if err != nil {
 		return err
 	}
-	for _, s := range streams {
-		log.Printf("[INFO] Found %s: %v", s.Name, s)
-		if s.Name == name {
-			d.Set("name", s.Name)
-		}
+	log.Printf("[INFO] Found %s: %v", info.Name, info)
+	d.Set("name", info.Name)
+	if len(info.WriteQueries) > 0 {
+		d.Set("query", info.WriteQueries[0].QueryString)
 	}
 	return nil
 }
