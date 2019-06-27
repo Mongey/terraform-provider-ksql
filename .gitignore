@@ -24,7 +24,6 @@
 *.out
 
 ### Go Patch ###
-/vendor/
 /Godeps/
 
 ### Intellij ###
