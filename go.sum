@@ -15,8 +15,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022/go.mod h1:nuWgzSkT5PnyOd+272uUmV0dnAnAn42Mk7PiQC5VzN4=
 github.com/DataDog/zstd v1.3.6-0.20190409195224-796139022798 h1:2T/jmrHeTezcCM58lvEQXs0UpQJCo5SoGAcg+mbSTIg=
 github.com/DataDog/zstd v1.3.6-0.20190409195224-796139022798/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
-github.com/Mongey/ksql v0.0.0-20190619184223-1373a14e7e3b h1:2pHS8d85Y82ngl7DRujfjXye50E1l+i+cO4kg1hnDKA=
-github.com/Mongey/ksql v0.0.0-20190619184223-1373a14e7e3b/go.mod h1:UehIlXuy2xzgusCGTf/zV7fUOXRkNqWCL0MeLs6ISx8=
+github.com/Mongey/ksql v0.0.0-20190529171234-5c43a2bbee69 h1:69SMwlX76Ei5FXIUf2tAR90CqpgfeeYfrvtSwL7JxLw=
+github.com/Mongey/ksql v0.0.0-20190529171234-5c43a2bbee69/go.mod h1:KDzg9H2M9F57Hbr8+41z3xRCE/4jjL6ir5aEKkmxI2I=
 github.com/Mongey/ksql v0.0.0-20190627160212-df1d87a81b4e h1:AC/0quIMRL5MnMjCywuulZ+CYga/4+ytm+uKs2qb7RI=
 github.com/Mongey/ksql v0.0.0-20190627160212-df1d87a81b4e/go.mod h1:UehIlXuy2xzgusCGTf/zV7fUOXRkNqWCL0MeLs6ISx8=
 github.com/Mongey/terraform-provider-kafka v0.1.1/go.mod h1:/y0l9ng9Vex0ZlOiMYwbMCsvZknr9Zt7Mf4iLhwVoQY=
@@ -353,6 +353,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/svanharmelen/jsonapi v0.0.0-20180618144545-0c0828c3f16d/go.mod h1:BSTlc8jOjh0niykqEGVXOLXdi9o0r0kR8tCYiMvjFgw=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
 github.com/terraform-providers/terraform-provider-openstack v1.15.0/go.mod h1:2aQ6n/BtChAl1y2S60vebhyJyZXBsuAI5G4+lHrT1Ew=
+github.com/ticketmaster/ksql v0.0.0-20190627160212-df1d87a81b4e h1:izmgk286fVdwrJrYifYZja1ARNiseGrzKwKWyMFimVI=
+github.com/ticketmaster/ksql v0.0.0-20190627160212-df1d87a81b4e/go.mod h1:UehIlXuy2xzgusCGTf/zV7fUOXRkNqWCL0MeLs6ISx8=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20171017195756-830351dc03c6/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/ugorji/go v0.0.0-20180813092308-00b869d2f4a5/go.mod h1:hnLbHMwcvSihnDhEfx2/BzKp2xb0Y+ErdfYcrs9tkJQ=
 github.com/ulikunitz/xz v0.5.4/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
