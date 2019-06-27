@@ -41,11 +41,11 @@ func testResourceTable_Check(s *terraform.State) error {
 
 	name := instanceState.ID
 
-	if name != instanceState.Attributes["name"] {
+	if isSameCaseInsensitiveString(name, instanceState.Attributes["name"]) {
 		return fmt.Errorf("id doesn't match name")
 	}
 
-	if name != "users" {
+	if isSameCaseInsensitiveString(name, "users") {
 		return fmt.Errorf("unexpected topic name %s", name)
 	}
 
