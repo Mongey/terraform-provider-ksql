@@ -46,11 +46,11 @@ func testResourceStream_Check(s *terraform.State) error {
 
 	name := instanceState.ID
 
-	if isSameCaseInsensitiveString(name, instanceState.Attributes["name"]) {
+	if !isSameCaseInsensitiveString(name, instanceState.Attributes["name"]) {
 		return fmt.Errorf("id '%s' doesn't match expected name '%s'", name, instanceState.Attributes["name"])
 	}
 
-	if isSameCaseInsensitiveString(name, "vault_logs") {
+	if !isSameCaseInsensitiveString(name, "vault_logs") {
 		return fmt.Errorf("unexpected stream name '%s'", name)
 	}
 
