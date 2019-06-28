@@ -10,10 +10,16 @@ import (
 )
 
 func TestBasicTable(t *testing.T) {
-	err := createTopic("users")
+	topic, err := createTopic("users")
+	defer func() {
+		err := topic.Delete()
+		if err != nil {
+			log.Printf("[ERROR] Unable to delete topic '%s': %v", topic.name, err)
+		}
+	}()
 	if err != nil {
 		log.Printf("[DEBUG] state %v", err)
-		t.Fatalf("Could not create the topic: %s", err)
+		t.Fatalf("Could not create the topic '%s': %s", topic.name, err)
 	}
 	r.Test(t, r.TestCase{
 		Providers: testAccProviders,
