@@ -3,6 +3,7 @@ package ksql
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/Mongey/ksql/ksql"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -13,6 +14,7 @@ func ksqlTableResource() *schema.Resource {
 		Create: tableCreate,
 		Read:   tableRead,
 		Delete: tableDelete,
+		Exists: tableExists,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
@@ -73,4 +75,24 @@ func tableDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] Deleting table %s", name)
 	err := c.DropTable(&ksql.DropTableRequest{Name: name})
 	return err
+}
+
+func tableExists(d *schema.ResourceData, meta interface{}) (b bool, e error) {
+	c := meta.(*ksql.Client)
+	name := d.Get("name").(string)
+	log.Printf("[INFO] Looking if %s '%s' exists", strings.ToLower(TableResource.Type), name)
+
+	ls, err := c.ListTables()
+	if err != nil {
+		return true, err
+	}
+
+	for _, r := range ls {
+		log.Printf("[INFO] Found %s: %+v", r.Name, r)
+		if isSameCaseInsensitiveString(r.Name, name) {
+			return true, err
+		}
+	}
+
+	return false, err
 }

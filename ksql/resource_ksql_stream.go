@@ -3,6 +3,7 @@ package ksql
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/Mongey/ksql/ksql"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -13,6 +14,7 @@ func ksqlStreamResource() *schema.Resource {
 		Create: streamCreate,
 		Read:   streamRead,
 		Delete: streamDelete,
+		Exists: streamExists,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
@@ -75,4 +77,24 @@ func streamDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] Deleting stream %s", name)
 	err := c.DropStream(&ksql.DropStreamRequest{Name: name})
 	return err
+}
+
+func streamExists(d *schema.ResourceData, meta interface{}) (b bool, e error) {
+	c := meta.(*ksql.Client)
+	name := d.Get("name").(string)
+	log.Printf("[INFO] Looking if %s '%s' exists", strings.ToLower(StreamResource.Type), name)
+
+	ls, err := c.ListStreams()
+	if err != nil {
+		return true, err
+	}
+
+	for _, r := range ls {
+		log.Printf("[INFO] Found %s: %+v", r.Name, r)
+		if isSameCaseInsensitiveString(r.Name, name) {
+			return true, err
+		}
+	}
+
+	return false, err
 }
