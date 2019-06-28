@@ -52,7 +52,7 @@ func testResourceTable_Check(s *terraform.State) error {
 	}
 
 	if !isSameCaseInsensitiveString(name, "users") {
-		return fmt.Errorf("unexpected topic name '%s'", name)
+		return fmt.Errorf("unexpected table name '%s'", name)
 	}
 
 	//_ = testProvider.Meta().(*ksql.Client)
