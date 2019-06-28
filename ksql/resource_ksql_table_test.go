@@ -48,11 +48,11 @@ func testResourceTable_Check(s *terraform.State) error {
 	name := instanceState.ID
 
 	if isSameCaseInsensitiveString(name, instanceState.Attributes["name"]) {
-		return fmt.Errorf("id doesn't match name")
+		return fmt.Errorf("id '%s' doesn't match expected name '%s'", name, instanceState.Attributes["name"])
 	}
 
 	if isSameCaseInsensitiveString(name, "users") {
-		return fmt.Errorf("unexpected topic name %s", name)
+		return fmt.Errorf("unexpected topic name '%s'", name)
 	}
 
 	//_ = testProvider.Meta().(*ksql.Client)
