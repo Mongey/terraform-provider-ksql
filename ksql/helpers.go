@@ -20,3 +20,18 @@ func DiffSuppressCaseSensitivity(k, old, new string, d *schema.ResourceData) boo
 	}
 	return false
 }
+
+func MinifyKSQL(query string) string {
+	// TODO: Add more KSQL minifying statements
+	// The idea is that 2 statements with different text formatting compared against their output
+	// from this function should now be equal if they represent the same logic.
+	// String removal should include:
+	//  - All line return
+	//  - Duplicate spaces except those within quotation marks
+	//  - Spaces after the KSQL operators "(", ")", "<", ">", ",", ...
+	//  - All the other possible same things
+
+	query = strings.Trim(query, "\n 	") // \n\s\t
+	query = strings.ReplaceAll(query, "\n", "")
+	return query
+}

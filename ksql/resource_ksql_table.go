@@ -24,10 +24,11 @@ func ksqlTableResource() *schema.Resource {
 				DiffSuppressFunc: DiffSuppressCaseSensitivity,
 			},
 			"query": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The query",
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "The query",
+				DiffSuppressFunc: TableResource.DiffSuppressEquivalentQueries,
 			},
 		},
 	}
@@ -38,7 +39,7 @@ func tableCreate(d *schema.ResourceData, meta interface{}) error {
 	query := d.Get("query").(string)
 	log.Printf("[WARN] Creating a table: %s with %s", name, query)
 	c := meta.(*ksql.Client)
-	q := fmt.Sprintf("CREATE TABLE %s %s", name, query)
+	q := TableResource.FormatCreateQuery(name, query)
 	log.Printf("[WARN] Query %s", q)
 
 	r := ksql.Request{
@@ -62,9 +63,18 @@ func tableRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	log.Printf("[INFO] Found %s: %v", info.Name, info)
-	d.Set("name", info.Name)
+	err = d.Set("name", info.Name)
+	if err != nil {
+		return err
+	}
+	if !isSameCaseInsensitiveString(info.Type, TableResource.Type) {
+		return fmt.Errorf("incompatible type '%s' when expected '%s'", info.Type, TableResource.Type)
+	}
 	if len(info.WriteQueries) > 0 {
-		d.Set("query", info.WriteQueries[0].QueryString)
+		err = d.Set("query", info.WriteQueries[0].QueryString)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
