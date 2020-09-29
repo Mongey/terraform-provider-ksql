@@ -2,38 +2,6 @@ provider "ksql" {
   url = "http://localhost:8088"
 }
 
-resource "ksql_table" "users" {
-  name = "users_original"
-
-  fields = {
-    registertime = "BIGINT"
-    gender       = "VARCHAR"
-    regionid     = "VARCHAR"
-    userid       = "VARCHAR"
-  }
-
-  settings = {
-    key          = "userid"
-    kafka_topic  = "users"
-    value_format = "JSON"
-  }
-}
-
-resource "ksql_stream" "pageviews" {
-  name = "pageviews_original"
-
-  fields = {
-    viewtime = "BIGINT"
-    userid   = "varchar"
-    pageid   = "varchar"
-  }
-
-  settings = {
-    kafka_topic  = "pageviews"
-    value_format = "DELIMITED"
-  }
-}
-
 resource "ksql_table" "logins" {
   name = "suspicious_attempts"
 
