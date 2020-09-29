@@ -8,3 +8,5 @@ require (
 	github.com/hashicorp/go-hclog v0.0.0-20190109152822-4783caec6f2e // indirect
 	github.com/hashicorp/terraform v0.12.0
 )
+
+replace github.com/Mongey/ksql => github.com/ticketmaster/ksql v0.0.0-20190627160212-df1d87a81b4e

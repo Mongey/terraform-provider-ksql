@@ -10,10 +10,16 @@ import (
 )
 
 func TestBasicTable(t *testing.T) {
-	err := createTopic("users")
+	topic, err := createTopic("users")
+	defer func() {
+		err := topic.Delete()
+		if err != nil {
+			log.Printf("[ERROR] Unable to delete topic '%s': %v", topic.name, err)
+		}
+	}()
 	if err != nil {
 		log.Printf("[DEBUG] state %v", err)
-		t.Fatalf("Could not create the topic: %s", err)
+		t.Fatalf("Could not create the topic '%s': %s", topic.name, err)
 	}
 	r.Test(t, r.TestCase{
 		Providers: testAccProviders,
@@ -41,12 +47,12 @@ func testResourceTable_Check(s *terraform.State) error {
 
 	name := instanceState.ID
 
-	if name != instanceState.Attributes["name"] {
-		return fmt.Errorf("id doesn't match name")
+	if !isSameCaseInsensitiveString(name, instanceState.Attributes["name"]) {
+		return fmt.Errorf("id '%s' doesn't match expected name '%s'", name, instanceState.Attributes["name"])
 	}
 
-	if name != "users" {
-		return fmt.Errorf("unexpected topic name %s", name)
+	if !isSameCaseInsensitiveString(name, "users") {
+		return fmt.Errorf("unexpected table name '%s'", name)
 	}
 
 	//_ = testProvider.Meta().(*ksql.Client)

@@ -11,11 +11,16 @@ import (
 )
 
 func TestBasicStream(t *testing.T) {
-	err := createTopic("vault")
+	topic, err := createTopic("vault")
+	defer func() {
+		err := topic.Delete()
+		if err != nil {
+			log.Printf("[ERROR] Unable to delete topic '%s': %v", topic.name, err)
+		}
+	}()
 	if err != nil {
-		log.Printf("[DEBUG] Could not create topic %v", err)
+		t.Fatalf("[DEBUG] Could not create topic '%s': %v", topic.name, err)
 	}
-
 	r.Test(t, r.TestCase{
 		Providers: testAccProviders,
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -41,12 +46,12 @@ func testResourceStream_Check(s *terraform.State) error {
 
 	name := instanceState.ID
 
-	if name != instanceState.Attributes["name"] {
-		return fmt.Errorf("id doesn't match name")
+	if !isSameCaseInsensitiveString(name, instanceState.Attributes["name"]) {
+		return fmt.Errorf("id '%s' doesn't match expected name '%s'", name, instanceState.Attributes["name"])
 	}
 
-	if name != "vault_logs" {
-		return fmt.Errorf("unexpected stream name %s", name)
+	if !isSameCaseInsensitiveString(name, "vault_logs") {
+		return fmt.Errorf("unexpected stream name '%s'", name)
 	}
 
 	return nil
@@ -63,12 +68,22 @@ resource "ksql_stream" "example" {
 }
 `
 
-func createTopic(name string) error {
+type kafkaTopic struct {
+	name string
+	client *kafka.Client
+}
+
+func (t *kafkaTopic) Delete() error {
+	return t.client.DeleteTopic(t.name)
+}
+
+func createTopic(name string) (*kafkaTopic, error) {
 	kafkaConfig := &kafka.Config{
 		BootstrapServers: &[]string{"localhost:9092"},
 		Timeout:          900,
 	}
 	kAdmin, err := kafka.NewClient(kafkaConfig)
+	kTopic := &kafkaTopic{name, kAdmin}
 	if err == nil {
 		topic := kafka.Topic{
 			Name:              name,
@@ -79,10 +94,10 @@ func createTopic(name string) error {
 
 		if err != nil {
 			log.Printf("[ERROR] Creating Topic: %v", err)
-			return err
+			return kTopic, err
 		}
 	} else {
 		log.Printf("[ERROR] Unable to create client: %s", err)
 	}
-	return err
+	return kTopic, err
 }

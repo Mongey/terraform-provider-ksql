@@ -3,6 +3,7 @@ package ksql
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/Mongey/ksql/ksql"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -13,18 +14,21 @@ func ksqlTableResource() *schema.Resource {
 		Create: tableCreate,
 		Read:   tableRead,
 		Delete: tableDelete,
+		Exists: tableExists,
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The name of the table",
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "The name of the table",
+				DiffSuppressFunc: DiffSuppressCaseSensitivity,
 			},
 			"query": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The query",
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "The query",
+				DiffSuppressFunc: TableResource.DiffSuppressEquivalentQueries,
 			},
 		},
 	}
@@ -35,7 +39,7 @@ func tableCreate(d *schema.ResourceData, meta interface{}) error {
 	query := d.Get("query").(string)
 	log.Printf("[WARN] Creating a table: %s with %s", name, query)
 	c := meta.(*ksql.Client)
-	q := fmt.Sprintf("CREATE TABLE %s %s", name, query)
+	q := TableResource.FormatCreateQuery(name, query)
 	log.Printf("[WARN] Query %s", q)
 
 	r := ksql.Request{
@@ -47,20 +51,30 @@ func tableCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	d.SetId(name)
-	return nil
+	return tableRead(d, meta)
 }
 
 func tableRead(d *schema.ResourceData, meta interface{}) error {
 	c := meta.(*ksql.Client)
 	name := d.Get("name").(string)
 	log.Printf("[ERROR] Searching for table %s", name)
-	tables, err := c.ListTables()
+	info, err := c.Describe(name)
 	if err != nil {
 		return err
 	}
-	for _, t := range tables {
-		//d.Set("query")
-		log.Printf("[INFO] Found %s: %v", t.Name, t)
+	log.Printf("[INFO] Found %s: %v", info.Name, info)
+	err = d.Set("name", info.Name)
+	if err != nil {
+		return err
+	}
+	if !isSameCaseInsensitiveString(info.Type, TableResource.Type) {
+		return fmt.Errorf("incompatible type '%s' when expected '%s'", info.Type, TableResource.Type)
+	}
+	if len(info.WriteQueries) > 0 {
+		err = d.Set("query", info.WriteQueries[0].QueryString)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -71,4 +85,24 @@ func tableDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] Deleting table %s", name)
 	err := c.DropTable(&ksql.DropTableRequest{Name: name})
 	return err
+}
+
+func tableExists(d *schema.ResourceData, meta interface{}) (b bool, e error) {
+	c := meta.(*ksql.Client)
+	name := d.Get("name").(string)
+	log.Printf("[INFO] Looking if %s '%s' exists", strings.ToLower(TableResource.Type), name)
+
+	ls, err := c.ListTables()
+	if err != nil {
+		return true, err
+	}
+
+	for _, r := range ls {
+		log.Printf("[INFO] Found %s: %+v", r.Name, r)
+		if isSameCaseInsensitiveString(r.Name, name) {
+			return true, err
+		}
+	}
+
+	return false, err
 }

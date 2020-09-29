@@ -8,7 +8,7 @@ cloud.google.com/go/internal/version
 cloud.google.com/go/compute/metadata
 # github.com/DataDog/zstd v1.3.6-0.20190409195224-796139022798
 github.com/DataDog/zstd
-# github.com/Mongey/ksql v0.0.0-20190529181749-2c1a4ea00a44
+# github.com/Mongey/ksql v0.0.0-20190627160212-df1d87a81b4e
 github.com/Mongey/ksql/ksql
 # github.com/Mongey/terraform-provider-kafka v0.2.0
 github.com/Mongey/terraform-provider-kafka/kafka
