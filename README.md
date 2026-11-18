@@ -20,16 +20,23 @@ your [terraform plugin directory][third-party-plugins] (typically `~/.terraform.
 
 ### Developing
 
-0. [Install go][install-go]
-0. Clone repository to: `$GOPATH/src/github.com/Mongey/terraform-provider-ksql`
-    ``` bash
-    mkdir -p $GOPATH/src/github.com/Mongey/terraform-provider-ksql; cd $GOPATH/src/github.com/Mongey/
-    git clone https://github.com/Mongey/terraform-provider-ksql.git
-    ```
-0. Build the provider `make build`
-0. Run the tests `make test`
+Install [Go 1.27.4 or later][install-go] and clone the repository into any directory.
 
-0. Build the provider `make build`
+```sh
+git clone https://github.com/Mongey/terraform-provider-ksql.git
+cd terraform-provider-ksql
+make build
+make vet
+make test
+```
+
+Dependencies are tracked in `vendor/`, which Go uses automatically. `make build`
+writes the provider binary into the repository root. Ordinary tests skip Kafka/KSQL
+acceptance tests. To run acceptance tests, start Kafka on `localhost:9092` and KSQL
+Server on `localhost:8088`, then run `make testacc`. These tests create Kafka topics.
+
+After changing dependencies, run `go mod tidy` and `go mod vendor`, then commit
+`go.mod`, `go.sum` and `vendor/` together.
 
 ## Provider Configuration
 
@@ -73,6 +80,6 @@ resource "ksql_table" "users" {
 ```
 
 
-[install-go]: https://golang.org/doc/install#install
+[install-go]: https://go.dev/doc/install
 [1]: https://www.terraform.io
 [2]: https://www.confluent.io/product/ksql/

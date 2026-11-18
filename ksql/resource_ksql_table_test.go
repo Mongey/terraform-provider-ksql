@@ -3,6 +3,7 @@ package ksql
 import (
 	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	r "github.com/hashicorp/terraform/helper/resource"
@@ -10,6 +11,10 @@ import (
 )
 
 func TestBasicTable(t *testing.T) {
+	if os.Getenv("TF_ACC") == "" {
+		t.Skip("set TF_ACC to run acceptance tests")
+	}
+
 	err := createTopic("users")
 	if err != nil {
 		log.Printf("[DEBUG] state %v", err)
