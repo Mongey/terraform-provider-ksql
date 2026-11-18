@@ -16,7 +16,7 @@ jobs:
           KAFKA_ZOOKEEPER_CONNECT: localhost:2181
           KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      - image: confluentinc/cp-ksql-server:5.2.1
+      - image: confluentinc/ksqldb-server:0.7.0
         environment:
           KSQL_BOOTSTRAP_SERVERS: localhost:9092
           KSQL_LISTENERS: http://0.0.0.0:8088/
@@ -34,7 +34,7 @@ jobs:
           name: Wait for ksql
           command: |
             curl --fail --silent --show-error --retry 30 --retry-connrefused \
-              --retry-all-errors --retry-delay 2 --max-time 5 http://localhost:8088 >/dev/null
+              --retry-all-errors --retry-delay 2 --max-time 5 http://localhost:8088/info >/dev/null
       - run:
           name: Run Tests
           command: |
