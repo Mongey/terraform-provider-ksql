@@ -1,17 +1,17 @@
-TEST?=$$(go list ./... |grep -v 'vendor')
-GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
+TEST?=./...
 
 default: build
 
 build:
-	go install
+	go build
 
 test:
-	go test -i $(TEST) || exit 1
-	echo $(TEST) | \
-		xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
+	go test $(TEST) $(TESTARGS) -timeout=30s -parallel=4
+
+vet:
+	go vet $(TEST)
 
 testacc:
 	TF_LOG=debug KSQL_SERVER_URL=localhost:8088 TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
 
-.PHONY: build test testacc
+.PHONY: default build test vet testacc
