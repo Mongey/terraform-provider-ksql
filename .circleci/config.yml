@@ -1,13 +1,12 @@
-version: 2
+version: 2.1
 jobs:
   build:
-    working_directory: /go/src/github.com/Mongey/terraform-provider-ksql
+    working_directory: ~/project
     docker:
-      - image: circleci/golang:1.12
+      - image: cimg/go:1.27.4
         environment:
           TEST_RESULTS: /tmp/test-results
-          GO111MODULE: "on"
-      - image: confluentinc/cp-zookeeper:latest
+      - image: confluentinc/cp-zookeeper:5.2.1
         environment:
           ZOOKEEPER_CLIENT_PORT: 2181
           ZOOKEEPER_TICK_TIME: 2000
@@ -23,23 +22,28 @@ jobs:
           KSQL_LISTENERS: http://0.0.0.0:8088/
     steps:
       - checkout
-      - run: go build
+      - run: go version
+      - run: make build
+      - run: make vet
+      - run: make test
       - store_artifacts:
-          path: /go/src/github.com/Mongey/terraform-provider-ksql/terraform-provider-ksql
+          path: terraform-provider-ksql
           destination: terraform-provider-ksql
-      - run: go get github.com/jstemmer/go-junit-report
       - run: mkdir -p $TEST_RESULTS
       - run:
           name: Wait for ksql
           command: |
-            until $(curl --output /dev/null --silent --head --fail http://localhost:8088); do
-              printf '.'
-              sleep 5
-            done
+            curl --fail --silent --show-error --retry 30 --retry-connrefused \
+              --retry-all-errors --retry-delay 2 --max-time 5 http://localhost:8088 >/dev/null
       - run:
           name: Run Tests
           command: |
-            trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
-            make testacc| tee ${TEST_RESULTS}/go-test.out
+            TF_LOG=debug KSQL_SERVER_URL=localhost:8088 TF_ACC=1 \
+              gotestsum --junitfile "$TEST_RESULTS/go-test-report.xml" -- -v -timeout 120m ./...
       - store_test_results:
           path: /tmp/test-results
+
+workflows:
+  build:
+    jobs:
+      - build

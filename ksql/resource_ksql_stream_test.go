@@ -3,6 +3,7 @@ package ksql
 import (
 	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/Mongey/terraform-provider-kafka/kafka"
@@ -11,6 +12,10 @@ import (
 )
 
 func TestBasicStream(t *testing.T) {
+	if os.Getenv("TF_ACC") == "" {
+		t.Skip("set TF_ACC to run acceptance tests")
+	}
+
 	err := createTopic("vault")
 	if err != nil {
 		log.Printf("[DEBUG] Could not create topic %v", err)
