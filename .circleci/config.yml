@@ -21,6 +21,9 @@ jobs:
           KSQL_BOOTSTRAP_SERVERS: localhost:9092
           KSQL_LISTENERS: http://0.0.0.0:8088/
     steps:
+      - run:
+          name: Use HTTPS for public checkout
+          command: git config --global url."https://github.com/".insteadOf "git@github.com:"
       - checkout
       - run: go version
       - run: make build
